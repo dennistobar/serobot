@@ -40,7 +40,7 @@ for page in pagegenerators.LiveRCPageGenerator(site=Site):
         revision = page._rcinfo.get('revision')
         ores = score(str(revision.get('new')))
         print ('>' if ores.get('prob') < 0.095 else ' ', revision.get('new'), ores.get('prob'), ores.get('prob_d'), page.title(), page._rcinfo.get('user'))
-        if ores.get('prob') < 0.095 or ores.get('prob_d') > 0.97 or (ores.get('prob') < 0.13 and ores.get('prob_d') > 0.90):
+        if ores.get('prob') < 0.095 or ores.get('prob_d') > 0.97 or (ores.get('prob') < 0.13 and ores.get('prob_d') > 0.95):
             old = page.text
             page.text = page.getOldVersion(revision.get('old'))
             pywikibot.showDiff(old, page.text)
