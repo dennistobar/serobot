@@ -14,16 +14,16 @@ from urllib import request
 def scores(revs):
     url = 'https://ores.wmflabs.org/v3/scores/eswiki/?models=goodfaith|damaging&revids='+('|').join(revs)
     retornar = {}
-    response = request.urlopen(url)
-    data = json.loads(response.read())
-    for rev in revs:
-        goodfaith = data.get('eswiki').get('scores').get(rev).get('goodfaith')
-        damaging = data.get('eswiki').get('scores').get(rev).get('damaging')
-        prediccion = goodfaith.get('score').get('prediction')
-        probabilidad = goodfaith.get('score').get('probability').get('true')
-        d_prediccion = damaging.get('score').get('prediction')
-        d_probabilidad = damaging.get('score').get('probability').get('true')
-        retornar[rev] = {'buena_fe': prediccion, 'prob': probabilidad, 'danina': d_prediccion, 'prob_d': d_probabilidad}
+    with request.urlopen(url) as response:
+        data = json.loads(response.read())
+        for rev in revs:
+            goodfaith = data.get('eswiki').get('scores').get(rev).get('goodfaith')
+            damaging = data.get('eswiki').get('scores').get(rev).get('damaging')
+            prediccion = goodfaith.get('score').get('prediction')
+            probabilidad = goodfaith.get('score').get('probability').get('true')
+            d_prediccion = damaging.get('score').get('prediction')
+            d_probabilidad = damaging.get('score').get('probability').get('true')
+            retornar[rev] = {'buena_fe': prediccion, 'prob': probabilidad, 'danina': d_prediccion, 'prob_d': d_probabilidad}
     return retornar
 
 def score(rev):
