@@ -3,12 +3,18 @@
 from __future__ import absolute_import, unicode_literals
 import pywikibot
 from pywikibot import pagegenerators
-import urllib, json
+import urllib, json, sys, os
+
+if sys.version_info[0] < 3:
+    print ('No podemos ejecutar el bot en versiones inferirores a 3')
+    os._exit(0)
+
+from urllib import request
 
 def scores(revs):
     url = 'https://ores.wmflabs.org/v3/scores/eswiki/?models=goodfaith|damaging&revids='+('|').join(revs)
     retornar = {}
-    response = urllib.urlopen(url)
+    response = request.urlopen(url)
     data = json.loads(response.read())
     for rev in revs:
         goodfaith = data.get('eswiki').get('scores').get(rev).get('goodfaith')
@@ -29,10 +35,10 @@ if Site.logged_in() == False:
     Site.login()
 
 for page in pagegenerators.LiveRCPageGenerator(site=Site):
-    if page._rcinfo.get('type') == 'edit' and page._rcinfo.get('namespace') in [0, 100] and page._rcinfo.get('user') <> Site.username():
+    if page._rcinfo.get('type') == 'edit' and page._rcinfo.get('namespace') in [0, 100] and page._rcinfo.get('user') != Site.username():
         revision = page._rcinfo.get('revision')
         ores = score(str(revision.get('new')))
-        print '>' if ores.get('prob') < 0.095 else ' ', revision.get('new'), ores.get('prob'), ores.get('prob_d'), page.title(), page._rcinfo.get('user')
+        print ('>' if ores.get('prob') < 0.095 else ' ', revision.get('new'), ores.get('prob'), ores.get('prob_d'), page.title(), page._rcinfo.get('user'))
         if ores.get('prob') < 0.095 or ores.get('prob_d') > 0.97 or (ores.get('prob') < 0.13 and ores.get('prob_d') > 0.90):
             old = page.text
             page.text = page.getOldVersion(revision.get('old'))
@@ -52,4 +58,4 @@ for page in pagegenerators.LiveRCPageGenerator(site=Site):
                     site=Site, parameters=parameters).submit()
 
             except Exception as e:
-                print u'No puedo guardar la página'
+                print (u'No puedo guardar la página')
