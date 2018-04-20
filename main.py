@@ -18,7 +18,8 @@ class SeroBOT(Bot):
     def __init__(self, generator, site=None, **kwargs):
         self.availableOptions.update({
             'gf': 0.085,
-            'dm': 0.970
+            'dm': 0.970,
+            'debug': False
         })
         """Constructor."""
         super(SeroBOT, self).__init__(**kwargs)
@@ -35,7 +36,8 @@ class SeroBOT(Bot):
                 continue
             data = [revision, buena_fe, danina, resultado,
                     page._rcinfo.get('user'), page.title(), datetime.utcnow().strftime('%Y%m%d%H%M%S'), int(datetime.utcnow().timestamp())]
-            print (data)
+            if self.getOption('debug'):
+                print (data)
             self.do_log(data)
             self.do_reverse(page) if resultado == True else False
             self.check_user(page._rcinfo.get('user'), page.title()) if resultado == True else False
@@ -75,7 +77,8 @@ class SeroBOT(Bot):
         rows = df_reversas[user & page & past]
         User = pywikibot.User(self.site, usuario)
         if (len(rows) == 2 and User.isAnonymous() == False):
-            print ('Avisando a ',usuario)
+            if self.getOption('debug'):
+                print ('Avisando a ',usuario)
             talk = pywikibot.Page(self.site, title=usuario, ns=3)
             talk.text += u"\n{{sust:Aviso prueba2|"+ pagina +"}} ~~~~"
             talk.save(comment=u'Aviso de pruebas a usuario tras reversiones consecutivas')
@@ -84,7 +87,8 @@ class SeroBOT(Bot):
             return
         rows = df_reversas[user & past]
         if (len(rows) == 4):
-            print ('VEC a ',usuario)
+            if self.getOption('debug'):
+                print ('VEC a ',usuario)
             with open(os.path.dirname(os.path.realpath(__file__)) + '/log/vec.log', 'a+') as archivo:
                 archivo.write('\t'.join(map(lambda x: str(x), [usuario, datetime.utcnow().strftime('%Y%m%d%H%M%S'), int(datetime.utcnow().timestamp())])) + '\n')
 
@@ -133,6 +137,8 @@ def main(*args):
             opts['gf'] = float(arg[4:])
         elif arg.startswith('-dm:'):
             opts['dm'] = float(arg[4:])
+        elif arg.startswith('--debug'):
+            opts['debug'] = True
 
     bot = SeroBOT(pagegenerators.LiveRCPageGenerator(),
                   site=pywikibot.Site(), **opts)
