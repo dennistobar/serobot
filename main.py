@@ -62,11 +62,11 @@ class SeroBOT(Bot):
             pywikibot.exception()
 
     def do_log(self, data):
-        with open(os.path.dirname(os.path.realpath(__file__)) + '/log/general.log', 'a+') as archivo:
-            archivo.write('\t'.join(map(lambda x: str(x), data)) + '\n')
+        with open(os.path.dirname(os.path.realpath(__file__)) + '/log/general.log', encoding='utf-8', mode='a+') as archivo:
+            archivo.write(u'\t'.join(map(lambda x: str(x), data)) + u'\n')
         if data[3] == True:
-            with open(os.path.dirname(os.path.realpath(__file__)) + '/log/positivo.log', 'a+') as archivo:
-                archivo.write('\t'.join(map(lambda x: str(x), data)) + '\n')
+            with open(os.path.dirname(os.path.realpath(__file__)) + '/log/positivo.log', encoding='utf-8', mode='a+') as archivo:
+                archivo.write(u'\t'.join(map(lambda x: str(x), data)) + u'\n')
 
     def check_user(self, usuario, pagina):
         df_reversas = pd.read_csv(os.path.dirname(os.path.realpath(
