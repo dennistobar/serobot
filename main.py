@@ -41,7 +41,7 @@ class SeroBOT(Bot):
             self.check_user(page._rcinfo.get('user'), page.title()) if resultado == True else False
 
     def valid(self, page):
-        return page._rcinfo.get('type') == 'edit' and page._rcinfo.get('namespace') in [0, 100] and page._rcinfo.get('user') != self.site.username()
+        return page._rcinfo.get('type') == 'edit' and page._rcinfo.get('bot') == False and page._rcinfo.get('namespace') in [0, 104] and page._rcinfo.get('user') != self.site.username() 
 
     def checkORES(self, page):
         revision = page._rcinfo.get('revision')
