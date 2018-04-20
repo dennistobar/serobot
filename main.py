@@ -95,7 +95,7 @@ class SeroBOT(Bot):
             tpl += u'|2=Reversiones: '+(', '.join(map(lambda x: u'[[Special:Diff/'+str(x)+'|diff: '+str(x)+']]', rows[0])))
             tpl += u'}}'
             vec.text += "\n"+tpl
-            vec.save(comment=u'Reportando al usuario [[:User:'+usuario+'|]] por reversiones vandálicas')
+            vec.save(comment=u'Reportando al usuario [[Special:Contributions/'+usuario+'|'+usuario+']] por reversiones vandálicas')
             return
 
     def do_reverse(self, page):
