@@ -41,7 +41,7 @@ class SeroBOT(Bot):
             self.check_user(page._rcinfo.get('user'), page.title()) if resultado == True else False
 
     def valid(self, page):
-        return page._rcinfo.get('type') == 'edit' and page._rcinfo.get('bot') == False and page._rcinfo.get('namespace') in [0, 104] and page._rcinfo.get('user') != self.site.username() 
+        return page._rcinfo.get('type') == 'edit' and page._rcinfo.get('bot') == False and page._rcinfo.get('namespace') in [0, 104] and page._rcinfo.get('user') != self.site.username()
 
     def checkORES(self, page):
         revision = page._rcinfo.get('revision')
@@ -71,7 +71,7 @@ class SeroBOT(Bot):
             __file__)) + '/log/positivo.log', header=None, delimiter='\t')
         user = df_reversas[4] == usuario
         page = df_reversas[5] == pagina
-        past = (int(datetime.utcnow().timestamp()) - df_reversas[7]) < 1200
+        past = (int(datetime.utcnow().timestamp()) - df_reversas[7]) < (60*60*4) # 4 horas
         rows = df_reversas[user & page & past]
         User = pywikibot.User(self.site, usuario)
         if (len(rows) == 2 and User.isAnonymous() == False):
@@ -94,7 +94,7 @@ class SeroBOT(Bot):
             tpl += u'|1='+usuario
             tpl += u'|2=Reversiones: '+(', '.join(map(lambda x: u'[[Special:Diff/'+str(x)+'|diff: '+str(x)+']]', rows[0])))
             tpl += u'}}'
-            vec.text += tpl
+            vec.text += "\n"+tpl
             vec.save(comment=u'Reportando al usuario [[:User:'+usuario+'|]] por reversiones vandálicas')
             return
 
