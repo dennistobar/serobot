@@ -99,7 +99,6 @@ class SeroBOT(Bot):
             return
 
     def do_reverse(self, page):
-        return True
         print ('>> Reversion', page._rcinfo.get('user'), page.title())
         try:
             token = pywikibot.data.api.Request(site=self.site, parameters={
@@ -112,10 +111,10 @@ class SeroBOT(Bot):
                           'markbot': True}
 
             pywikibot.data.api.Request(
-                site=Site, parameters=parameters).submit()
+                site=self.site, parameters=parameters).submit()
 
         except Exception as e:
-            print (u'No puedo guardar la página')
+            print (u'No puedo guardar la página ', e)
 
 
 def main(*args):
