@@ -47,13 +47,14 @@ class SeroBOT(Bot):
         return page._rcinfo.get('type') == 'edit' and page._rcinfo.get('bot') == False and page._rcinfo.get('namespace') in [0, 104] and page._rcinfo.get('user') != self.site.username()
 
     def checkORES(self, page):
+        headers = {
+            'User-Agent': 'SeroBOT - an ORES counter vandalism tool'
+        }
         wiki = self.getOption('wiki')
         revision = page._rcinfo.get('revision')
         ores = str(revision.get('new'))
         url = 'https://ores.wmflabs.org/v3/scores/{0}/{1}'.format(wiki, ores)
-        print (url)
-        retornar = {}
-        r = requests.get(url=url)
+        r = requests.get(url=url, headers=headers)
         data = r.json()
         try:
             goodfaith = data.get(wiki).get('scores').get(ores).get('goodfaith')
