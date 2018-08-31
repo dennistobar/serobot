@@ -54,7 +54,7 @@ class SeroBOT(Bot):
         wiki = self.getOption('wiki')
         revision = page._rcinfo.get('revision')
         ores = str(revision.get('new'))
-        url = 'https://ores.wmflabs.org/v3/scores/{0}/{1}'.format(wiki, ores)
+        url = 'https://ores.wikimedia.org/v3/scores/{0}/{1}'.format(wiki, ores)
         r = requests.get(url=url, headers=headers)
         data = r.json()
         try:
