@@ -41,7 +41,7 @@ class SeroBOT(Bot):
                 print (data)
             self.do_log(data)
             self.do_reverse(page) if resultado == True else False
-            if ((self.site.family.name == 'wikipedia' and self.site.lang == 'es')):
+            if (self.site.family.name == 'wikipedia' and self.site.lang == 'es'):
                 self.check_user(page._rcinfo.get('user'), page.title()) if resultado == True else False
 
     def valid(self, page):
@@ -106,7 +106,10 @@ class SeroBOT(Bot):
             tpl += u'|2=Reversiones: '+(', '.join(map(lambda x: u'[[Special:Diff/'+str(x)+'|diff: '+str(x)+']]', rows[0])))
             tpl += u'}}'
             vec.text += "\n"+tpl
-            vec.save(comment=u'Reportando al usuario [[Special:Contributions/'+usuario+'|'+usuario+']] por posibles reversiones vandálicas')
+            try:
+                vec.save(comment=u'Reportando al usuario [[Special:Contributions/'+usuario+'|'+usuario+']] por posibles reversiones vandálicas')
+            except:
+                pass
         return
 
     def do_reverse(self, page):
