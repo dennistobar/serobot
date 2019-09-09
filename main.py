@@ -30,24 +30,20 @@ class SeroBOT(Bot):
             self.site.login()
 
     def run(self):
-        try:
-            for page in filter(lambda x: self.valid(x), self.generator):
-                try:
-                    revision, buena_fe, danina, resultado = self.checkORES(page)
-                except:
-                    continue
-                data = [revision, buena_fe, danina, resultado,
-                        page._rcinfo.get('user'), page.title(), datetime.utcnow().strftime('%Y%m%d%H%M%S'), int(datetime.utcnow().timestamp())]
-                if self.getOption('debug'):
-                    print (data)
-                self.do_log(data)
-                self.do_reverse(page) if resultado == True else False
-                if (self.site.family.name == 'wikipedia' and self.site.lang == 'es'):
-                    self.check_user(page._rcinfo.get('user'), page.title()) if resultado == True else False
-        except KeyboardInterrupt:
-            pass
-        except:
-            self.run()
+        for page in filter(lambda x: self.valid(x), self.generator):
+            try:
+                revision, buena_fe, danina, resultado = self.checkORES(page)
+            except:
+                continue
+            data = [revision, buena_fe, danina, resultado,
+                    page._rcinfo.get('user'), page.title(), datetime.utcnow().strftime('%Y%m%d%H%M%S'), int(datetime.utcnow().timestamp())]
+            if self.getOption('debug'):
+                print (data)
+            self.do_log(data)
+            self.do_reverse(page) if resultado == True else False
+            if (self.site.family.name == 'wikipedia' and self.site.lang == 'es'):
+                self.check_user(page._rcinfo.get('user'), page.title()) if resultado == True else False
+
 
     def valid(self, page):
         return page._rcinfo.get('type') == 'edit' and page._rcinfo.get('bot') == False and page._rcinfo.get('namespace') in [0, 104] and page._rcinfo.get('user') != self.site.username()
@@ -136,10 +132,8 @@ class SeroBOT(Bot):
         except Exception as e:
             print (u'No puedo revertir la página ', e)
 
-        old = page.text
         page.text = page.getOldVersion(page._rcinfo.get('revision').get('old'))
         page.save(comment=u'Revirtiendo página por vandalismo detectado por [[:mw:ORES|ORES]]')
-
 
 def main(*args):
     """
