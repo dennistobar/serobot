@@ -126,6 +126,8 @@ class SeroBOT(Bot):
             print ('Solicitud de protección de página ',pagina)
 
         tabp = pywikibot.Page(self.site, title='Tablón de anuncios de los bibliotecarios/Portal/Archivo/Protección de artículos/Actual', ns=4)
+        if (tabp.get().find('{{{{a|{0}}}}}'.format(pagina)) != -1):
+            return
         tpl = '{{{{subst:Usuario:SeroBOT/TABP|pagina={0}|firma=~~~~}}}}'.format(pagina)
         tabp.text += "\n"+tpl
         try:
