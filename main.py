@@ -43,6 +43,7 @@ class SeroBOT(Bot):
             self.do_reverse(page) if resultado == True else False
             if (self.site.family.name == 'wikipedia' and self.site.lang == 'es'):
                 self.check_user(page._rcinfo.get('user'), page.title()) if resultado == True else False
+                self.check_pagina(page.title()) if resultado == True else False
 
 
     def valid(self, page):
@@ -111,6 +112,26 @@ class SeroBOT(Bot):
                 vec.save(comment=u'Reportando al usuario [[Special:Contributions/'+usuario+'|'+usuario+']] por posibles reversiones vandálicas')
             except:
                 pass
+        return
+
+    def check_pagina(self, pagina):
+        positivo = "{0}/log/{1}-positivo.log".format(os.path.dirname(os.path.realpath(__file__)), self.getOption('wiki'))
+        df_reversas = pd.read_csv(positivo, header=None, delimiter='\t')
+        page = df_reversas[5] == pagina
+        past = (int(datetime.utcnow().timestamp()) - df_reversas[7]) < (60*60*4) # 4 horas
+        rows = df_reversas[page & past]
+        if (len(rows) < 6):
+            return
+        if self.getOption('debug'):
+            print ('Solicitud de protección de página ',pagina)
+
+        tabp = pywikibot.Page(self.site, title='Tablón de anuncios de los bibliotecarios/Portal/Archivo/Protección de artículos/Actual', ns=4)
+        tpl = '{{{{subst:Usuario:SeroBOT/TABP|pagina={0}|firma=~~~~}}}}'.format(pagina)
+        tabp.text += "\n"+tpl
+        try:
+            tabp.save(comment=u'Solicitando protección de {0} por reversiones consecutivas'.format(pagina))
+        except:
+            pass
         return
 
     def do_reverse(self, page):
