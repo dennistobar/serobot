@@ -155,8 +155,8 @@ class SeroBOT(Bot):
         except Exception as e:
             print (u'No puedo revertir la página ', e)
 
-        page.text = page.getOldVersion(page._rcinfo.get('revision').get('old'))
-        page.save(comment=u'Revirtiendo página por vandalismo detectado por [[:mw:ORES|ORES]]')
+        # page.text = page.getOldVersion(page._rcinfo.get('revision').get('old'))
+        # page.save(comment=u'Revirtiendo página por vandalismo detectado por [[:mw:ORES|ORES]]')
 
 def main(*args):
     """
