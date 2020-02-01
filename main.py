@@ -85,7 +85,16 @@ class SeroBOT(Bot):
         past = (int(datetime.utcnow().timestamp()) - df_reversas[7]) < (60*60*4) # 4 horas
         rows = df_reversas[user & page & past]
         User = pywikibot.User(self.site, usuario)
-        if (len(rows) == 2 and User.isAnonymous() == False):
+                if (len(rows) == 1):
+            if self.getOption('debug'):
+                print ('Avisando a ',usuario)
+            talk = pywikibot.Page(self.site, title=usuario, ns=3)
+            talk.text += u"\n{{sust:Aviso prueba1|"+ pagina +"}} ~~~~"
+            talk.save(comment=u'Aviso de pruebas a usuario tras reversiones consecutivas')
+            with open(os.path.dirname(os.path.realpath(__file__)) + '/log/discusiones.log', 'a+') as archivo:
+                archivo.write('\t'.join(map(lambda x: str(x), [usuario, pagina, datetime.utcnow().strftime('%Y%m%d%H%M%S'), int(datetime.utcnow().timestamp())])) + '\n')
+            return
+        if (len(rows) == 2):
             if self.getOption('debug'):
                 print ('Avisando a ',usuario)
             talk = pywikibot.Page(self.site, title=usuario, ns=3)
@@ -95,7 +104,25 @@ class SeroBOT(Bot):
                 archivo.write('\t'.join(map(lambda x: str(x), [usuario, pagina, datetime.utcnow().strftime('%Y%m%d%H%M%S'), int(datetime.utcnow().timestamp())])) + '\n')
             return
         rows = df_reversas[user & past]
-        if (len(rows) == 4):
+               if (len(rows) == 3):
+            if self.getOption('debug'):
+                print ('Avisando a ',usuario)
+            talk = pywikibot.Page(self.site, title=usuario, ns=3)
+            talk.text += u"\n{{sust:Aviso prueba3|"+ pagina +"}} ~~~~"
+            talk.save(comment=u'Aviso de pruebas a usuario tras reversiones consecutivas')
+            with open(os.path.dirname(os.path.realpath(__file__)) + '/log/discusiones.log', 'a+') as archivo:
+                archivo.write('\t'.join(map(lambda x: str(x), [usuario, pagina, datetime.utcnow().strftime('%Y%m%d%H%M%S'), int(datetime.utcnow().timestamp())])) + '\n')
+            return
+               if (len(rows) == 4):
+            if self.getOption('debug'):
+                print ('Avisando a ',usuario)
+            talk = pywikibot.Page(self.site, title=usuario, ns=3)
+            talk.text += u"\n{{sust:Aviso prueba4|"+ pagina +"}} ~~~~"
+            talk.save(comment=u'Aviso de pruebas a usuario tras reversiones consecutivas')
+            with open(os.path.dirname(os.path.realpath(__file__)) + '/log/discusiones.log', 'a+') as archivo:
+                archivo.write('\t'.join(map(lambda x: str(x), [usuario, pagina, datetime.utcnow().strftime('%Y%m%d%H%M%S'), int(datetime.utcnow().timestamp())])) + '\n')
+            return
+        if (len(rows) == 5):
             if self.getOption('debug'):
                 print ('VEC a ',usuario)
             with open(os.path.dirname(os.path.realpath(__file__)) + '/log/vec.log', 'a+') as archivo:
