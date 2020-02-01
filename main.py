@@ -94,6 +94,7 @@ class SeroBOT(Bot):
             with open(os.path.dirname(os.path.realpath(__file__)) + '/log/discusiones.log', 'a+') as archivo:
                 archivo.write('\t'.join(map(lambda x: str(x), [usuario, pagina, datetime.utcnow().strftime('%Y%m%d%H%M%S'), int(datetime.utcnow().timestamp())])) + '\n')
             return
+                rows = df_reversas[user & past]
         if (len(rows) == 2):
             if self.getOption('debug'):
                 print ('Avisando a ',usuario)
@@ -103,7 +104,6 @@ class SeroBOT(Bot):
             with open(os.path.dirname(os.path.realpath(__file__)) + '/log/discusiones.log', 'a+') as archivo:
                 archivo.write('\t'.join(map(lambda x: str(x), [usuario, pagina, datetime.utcnow().strftime('%Y%m%d%H%M%S'), int(datetime.utcnow().timestamp())])) + '\n')
             return
-        rows = df_reversas[user & past]
                if (len(rows) == 3):
             if self.getOption('debug'):
                 print ('Avisando a ',usuario)
