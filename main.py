@@ -40,7 +40,7 @@ class SeroBOT(Bot):
             if self.getOption('debug'):
                 print(data)
             self.do_log(data)
-            # self.do_reverse(page) if resultado == True else False
+            self.do_reverse(page) if resultado == True else False
             if (self.site.family.name == 'wikipedia' and self.site.lang == 'es'):
                 self.check_user(page._rcinfo.get('user'),
                                 page.title()) if resultado == True else False
