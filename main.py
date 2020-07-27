@@ -38,15 +38,26 @@ class SeroBOT(Bot):
             data = [revision, buena_fe, danina, resultado,
                     page._rcinfo.get('user'), page.title(), datetime.utcnow().strftime('%Y%m%d%H%M%S'), int(datetime.utcnow().timestamp())]
             if self.getOption('debug'):
-                print (data)
+                print(data)
             self.do_log(data)
-            self.do_reverse(page) if resultado == True else False
+            # self.do_reverse(page) if resultado == True else False
             if (self.site.family.name == 'wikipedia' and self.site.lang == 'es'):
-                self.check_user(page._rcinfo.get('user'), page.title()) if resultado == True else False
+                self.check_user(page._rcinfo.get('user'),
+                                page.title()) if resultado == True else False
                 self.check_pagina(page.title()) if resultado == True else False
 
-
     def valid(self, page):
+        """
+        Determina si un cambio es válido para poder invocar el endpoint de ORES
+        Selecciona
+        * solo las ediciones,
+        * el usuario no es bot
+        * espacios de nombres 0 y 104 (principal y anexo)
+        * el usuario no soy yo mismo (SeroBOT)
+
+        @param page: página a chequear
+        @return true
+        """
         return page._rcinfo.get('type') == 'edit' and page._rcinfo.get('bot') == False and page._rcinfo.get('namespace') in [0, 104] and page._rcinfo.get('user') != self.site.username()
 
     def checkORES(self, page):
@@ -69,8 +80,10 @@ class SeroBOT(Bot):
             pywikibot.exception()
 
     def do_log(self, data):
-        general = "{0}/log/{1}-general.log".format(os.path.dirname(os.path.realpath(__file__)), self.getOption('wiki'))
-        positivo = "{0}/log/{1}-positivo.log".format(os.path.dirname(os.path.realpath(__file__)), self.getOption('wiki'))
+        general = "{0}/log/{1}-general.log".format(os.path.dirname(
+            os.path.realpath(__file__)), self.getOption('wiki'))
+        positivo = "{0}/log/{1}-positivo.log".format(os.path.dirname(
+            os.path.realpath(__file__)), self.getOption('wiki'))
         with open(general, encoding='utf-8', mode='a+') as archivo:
             archivo.write(u'\t'.join(map(lambda x: str(x), data)) + u'\n')
         if data[3] == True:
@@ -78,67 +91,82 @@ class SeroBOT(Bot):
                 archivo.write(u'\t'.join(map(lambda x: str(x), data)) + u'\n')
 
     def check_user(self, usuario, pagina):
-        positivo = "{0}/log/{1}-positivo.log".format(os.path.dirname(os.path.realpath(__file__)), self.getOption('wiki'))
+        positivo = "{0}/log/{1}-positivo.log".format(os.path.dirname(
+            os.path.realpath(__file__)), self.getOption('wiki'))
         df_reversas = pd.read_csv(positivo, header=None, delimiter='\t')
         user = df_reversas[4] == usuario
         page = df_reversas[5] == pagina
-        past = (int(datetime.utcnow().timestamp()) - df_reversas[7]) < (60*60*4) # 4 horas
+        past = (int(datetime.utcnow().timestamp()) -
+                df_reversas[7]) < (60*60*4)  # 4 horas
         rows = df_reversas[user & page & past]
         User = pywikibot.User(self.site, usuario)
         if (len(rows) == 2 and User.isAnonymous() == False):
             if self.getOption('debug'):
-                print ('Avisando a ',usuario)
+                print('Avisando a ', usuario)
             talk = pywikibot.Page(self.site, title=usuario, ns=3)
-            talk.text += u"\n{{sust:Aviso prueba2|"+ pagina +"}} ~~~~"
-            talk.save(comment=u'Aviso de pruebas a usuario tras reversiones consecutivas')
+            talk.text += u"\n{{sust:Aviso prueba2|" + pagina + "}} ~~~~"
+            talk.save(
+                comment=u'Aviso de pruebas a usuario tras reversiones consecutivas')
             with open(os.path.dirname(os.path.realpath(__file__)) + '/log/discusiones.log', 'a+') as archivo:
-                archivo.write('\t'.join(map(lambda x: str(x), [usuario, pagina, datetime.utcnow().strftime('%Y%m%d%H%M%S'), int(datetime.utcnow().timestamp())])) + '\n')
+                archivo.write('\t'.join(map(lambda x: str(x), [usuario, pagina, datetime.utcnow(
+                ).strftime('%Y%m%d%H%M%S'), int(datetime.utcnow().timestamp())])) + '\n')
             return
         rows = df_reversas[user & past]
         if (len(rows) == 4):
             if self.getOption('debug'):
-                print ('VEC a ',usuario)
+                print('VEC a ', usuario)
             with open(os.path.dirname(os.path.realpath(__file__)) + '/log/vec.log', 'a+') as archivo:
-                archivo.write('\t'.join(map(lambda x: str(x), [usuario, datetime.utcnow().strftime('%Y%m%d%H%M%S'), int(datetime.utcnow().timestamp())])) + '\n')
+                archivo.write('\t'.join(map(lambda x: str(x), [usuario, datetime.utcnow(
+                ).strftime('%Y%m%d%H%M%S'), int(datetime.utcnow().timestamp())])) + '\n')
 
             vec = pywikibot.Page(self.site, title='Vandalismo en curso', ns=4)
             tpl = u'{{subst:'
             tpl += 'ReportevandalismoIP' if User.isAnonymous() else 'Reportevandalismo'
             tpl += u'|1='+usuario
-            tpl += u'|2=Reversiones: '+(', '.join(map(lambda x: u'[[Special:Diff/'+str(x)+'|diff: '+str(x)+']]', rows[0])))
+            tpl += u'|2=Reversiones: ' + \
+                (', '.join(
+                    map(lambda x: u'[[Special:Diff/'+str(x)+'|diff: '+str(x)+']]', rows[0])))
             tpl += u'}}'
             vec.text += "\n"+tpl
             try:
-                vec.save(comment=u'Reportando al usuario [[Special:Contributions/'+usuario+'|'+usuario+']] por posibles reversiones vandálicas')
+                vec.save(comment=u'Reportando al usuario [[Special:Contributions/' +
+                         usuario+'|'+usuario+']] por posibles reversiones vandálicas')
             except:
                 pass
         return
 
     def check_pagina(self, pagina):
-        positivo = "{0}/log/{1}-positivo.log".format(os.path.dirname(os.path.realpath(__file__)), self.getOption('wiki'))
+        positivo = "{0}/log/{1}-positivo.log".format(os.path.dirname(
+            os.path.realpath(__file__)), self.getOption('wiki'))
         df_reversas = pd.read_csv(positivo, header=None, delimiter='\t')
         page = df_reversas[5] == pagina
-        past = (int(datetime.utcnow().timestamp()) - df_reversas[7]) < (60*60*4) # 4 horas
+        past = (int(datetime.utcnow().timestamp()) -
+                df_reversas[7]) < (60*60*4)  # 4 horas
+        users = df_reversas[page & past][4].nunique()
+
         rows = df_reversas[page & past]
-        if (len(rows) < 6):
+        if (len(rows) < 6 or users < 2):
             return
         if self.getOption('debug'):
-            print ('Solicitud de protección de página ',pagina)
+            print('Solicitud de protección de página ', pagina)
 
-        tabp = pywikibot.Page(self.site, title='Tablón de anuncios de los bibliotecarios/Portal/Archivo/Protección de artículos/Actual', ns=4)
+        tabp = pywikibot.Page(
+            self.site, title='Tablón de anuncios de los bibliotecarios/Portal/Archivo/Protección de artículos/Actual', ns=4)
         if (tabp.get().find('{{{{a|{0}}}}}'.format(pagina)) != -1):
             return
-        tpl = '{{{{subst:Usuario:SeroBOT/TABP|pagina={0}|firma=~~~~}}}}'.format(pagina)
+        tpl = '{{{{subst:Usuario:SeroBOT/TABP|pagina={0}|firma=~~~~}}}}'.format(
+            pagina)
         tabp.text += "\n"+tpl
         try:
-            tabp.save(comment=u'Solicitando protección de {0} por reversiones consecutivas'.format(pagina))
+            tabp.save(
+                comment=u'Solicitando protección de {0} por reversiones consecutivas'.format(pagina))
         except:
             pass
         return
 
     def do_reverse(self, page):
         if self.getOption('debug'):
-            print ('>> Reversion', page._rcinfo.get('user'), page.title())
+            print('>> Reversion', page._rcinfo.get('user'), page.title())
         try:
             token = pywikibot.data.api.Request(site=self.site, parameters={
                                                'action': 'query', 'meta': 'tokens', 'type': 'rollback'}).submit()['query']['tokens']['rollbacktoken']
@@ -153,10 +181,8 @@ class SeroBOT(Bot):
                 site=self.site, parameters=parameters).submit()
             return
         except Exception as e:
-            print (u'No puedo revertir la página ', e)
+            print(u'No puedo revertir la página ', e)
 
-        # page.text = page.getOldVersion(page._rcinfo.get('revision').get('old'))
-        # page.save(comment=u'Revirtiendo página por vandalismo detectado por [[:mw:ORES|ORES]]')
 
 def main(*args):
     """
@@ -188,6 +214,7 @@ def main(*args):
     bot = SeroBOT(pagegenerators.LiveRCPageGenerator(site),
                   site=site, **opts)
     bot.run()
+
 
 if __name__ == '__main__':
     main()
