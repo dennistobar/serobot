@@ -10,7 +10,7 @@ Este script requiere de [pywikibot](https://mediawiki.org/wiki/pywikibot) para f
 Para las dependencias, se deben instalar lo siguiente:
 `pip3 install sseclient requests pandas`
 
-Una vez hecho, se debe clonar el repositorio y ejecutar el script `python pwb.py <carpeta>/bot-revertir` para comenzar la ejecución del bot.
+Una vez hecho, se debe clonar el repositorio y ejecutar el script `python pwb.py <carpeta>/main` para comenzar la ejecución del bot.
 
 ## Coopera
 Para cooperar con la construcción del bot, puede hacer pull request o reportar un [issue nuevo](https://github.com/dennistobar/serobot/issues/new) en [github](https://github.com/dennistobar/serobot.git)
