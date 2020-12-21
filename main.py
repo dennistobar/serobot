@@ -130,7 +130,7 @@ class SeroBOT(Bot):
             vec.text += "\n"+tpl
             try:
                 vec.save(comment=u'Reportando al usuario [[Special:Contributions/' +
-                         usuario+'|'+usuario+']] por posibles vandalismos o posibles ediciones vándalicas')
+                         usuario+'|'+usuario+']] por posibles ediciones vándalicas')
             except:
                 pass
         return
