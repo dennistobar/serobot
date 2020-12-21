@@ -120,7 +120,7 @@ class SeroBOT(Bot):
                 ).strftime('%Y%m%d%H%M%S'), int(datetime.utcnow().timestamp())])) + '\n')
 
             vec = pywikibot.Page(self.site, title='Vandalismo en curso', ns=4)
-            tpl = u'{{subst:'
+            tpl = "\n"+u'{{subst:'
             tpl += 'ReportevandalismoIP' if User.isAnonymous() else 'Reportevandalismo'
             tpl += u'|1='+usuario
             tpl += u'|2=Reversiones: ' + \
@@ -130,7 +130,7 @@ class SeroBOT(Bot):
             vec.text += "\n"+tpl
             try:
                 vec.save(comment=u'Reportando al usuario [[Special:Contributions/' +
-                         usuario+'|'+usuario+']] por posibles reversiones vandálicas')
+                         usuario+'|'+usuario+']] por posibles vandalismos o posibles ediciones vándalicas')
             except:
                 pass
         return
@@ -154,7 +154,7 @@ class SeroBOT(Bot):
             self.site, title='Tablón de anuncios de los bibliotecarios/Portal/Archivo/Protección de artículos/Actual', ns=4)
         if (tabp.get().find('{{{{a|{0}}}}}'.format(pagina)) != -1):
             return
-        tpl = '{{{{subst:Usuario:SeroBOT/TABP|pagina={0}|firma=~~~~}}}}'.format(
+        tpl = "\n"+'{{{{subst:Usuario:SeroBOT/TABP|pagina={0}|firma=~~~~}}}}'.format(
             pagina)
         tabp.text += "\n"+tpl
         try:
