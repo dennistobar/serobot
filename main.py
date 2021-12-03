@@ -16,7 +16,7 @@ class SeroBOT(Bot):
     """BOT que revierte desde ORES"""
 
     def __init__(self, generator, site=None, **kwargs):
-        self.availableOptions.update({
+        self.available_options.update({
             'gf': 0.085,
             'dm': 0.970,
             'wiki': 'eswiki',
