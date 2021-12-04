@@ -33,11 +33,11 @@ class SeroBOT(Bot):
         for page in filter(lambda x: self.valid(x), self.generator):
             try:
                 revision, buena_fe, danina, resultado = self.checkORES(page)
-            except:
+            except Exception as e:
                 continue
             data = [revision, buena_fe, danina, resultado,
                     page._rcinfo.get('user'), page.title(), datetime.utcnow().strftime('%Y%m%d%H%M%S'), int(datetime.utcnow().timestamp())]
-            if self.getOption('debug'):
+            if self.available_options.get('debug'):
                 print(data)
             self.do_log(data)
             self.do_reverse(page) if resultado == True else False
@@ -64,7 +64,7 @@ class SeroBOT(Bot):
         headers = {
             'User-Agent': 'SeroBOT - an ORES counter vandalism tool'
         }
-        wiki = self.getOption('wiki')
+        wiki = self.available_options.get('wiki')
         revision = page._rcinfo.get('revision')
         ores = str(revision.get('new'))
         url = 'https://ores.wikimedia.org/v3/scores/{0}/{1}'.format(wiki, ores)
@@ -75,15 +75,15 @@ class SeroBOT(Bot):
             damaging = data.get(wiki).get('scores').get(ores).get('damaging')
             buena_fe = goodfaith.get('score').get('probability').get('true')
             danina = damaging.get('score').get('probability').get('true')
-            return (ores, buena_fe, danina, True if buena_fe < self.getOption('gf') or danina > self.getOption('dm') else False)
+            return (ores, buena_fe, danina, True if buena_fe < self.available_options.get('gf') or danina > self.available_options.get('dm') else False)
         except:
             pywikibot.exception()
 
     def do_log(self, data):
         general = "{0}/log/{1}-general.log".format(os.path.dirname(
-            os.path.realpath(__file__)), self.getOption('wiki'))
+            os.path.realpath(__file__)), self.available_options.get('wiki'))
         positivo = "{0}/log/{1}-positivo.log".format(os.path.dirname(
-            os.path.realpath(__file__)), self.getOption('wiki'))
+            os.path.realpath(__file__)), self.available_options.get('wiki'))
         with open(general, encoding='utf-8', mode='a+') as archivo:
             archivo.write(u'\t'.join(map(lambda x: str(x), data)) + u'\n')
         if data[3] == True:
@@ -92,7 +92,7 @@ class SeroBOT(Bot):
 
     def check_user(self, usuario, pagina):
         positivo = "{0}/log/{1}-positivo.log".format(os.path.dirname(
-            os.path.realpath(__file__)), self.getOption('wiki'))
+            os.path.realpath(__file__)), self.available_options.get('wiki'))
         df_reversas = pd.read_csv(positivo, header=None, delimiter='\t')
         user = df_reversas[4] == usuario
         page = df_reversas[5] == pagina
@@ -101,7 +101,7 @@ class SeroBOT(Bot):
         rows = df_reversas[user & page & past]
         User = pywikibot.User(self.site, usuario)
         if (len(rows) == 2 and User.isAnonymous() == False):
-            if self.getOption('debug'):
+            if self.available_options.get('debug'):
                 print('Avisando a ', usuario)
             talk = pywikibot.Page(self.site, title=usuario, ns=3)
             talk.text += u"\n{{sust:Aviso prueba2|" + pagina + "}} ~~~~"
@@ -113,7 +113,7 @@ class SeroBOT(Bot):
             return
         rows = df_reversas[user & past]
         if (len(rows) == 4):
-            if self.getOption('debug'):
+            if self.available_options.get('debug'):
                 print('VEC a ', usuario)
             with open(os.path.dirname(os.path.realpath(__file__)) + '/log/vec.log', 'a+') as archivo:
                 archivo.write('\t'.join(map(lambda x: str(x), [usuario, datetime.utcnow(
@@ -137,7 +137,7 @@ class SeroBOT(Bot):
 
     def check_pagina(self, pagina):
         positivo = "{0}/log/{1}-positivo.log".format(os.path.dirname(
-            os.path.realpath(__file__)), self.getOption('wiki'))
+            os.path.realpath(__file__)), self.available_options.get('wiki'))
         df_reversas = pd.read_csv(positivo, header=None, delimiter='\t')
         page = df_reversas[5] == pagina
         past = (int(datetime.utcnow().timestamp()) -
@@ -147,7 +147,7 @@ class SeroBOT(Bot):
         rows = df_reversas[page & past]
         if (len(rows) < 6 or users < 2):
             return
-        if self.getOption('debug'):
+        if self.available_options.get('debug'):
             print('Solicitud de protección de página ', pagina)
 
         tabp = pywikibot.Page(
@@ -165,7 +165,7 @@ class SeroBOT(Bot):
         return
 
     def do_reverse(self, page):
-        if self.getOption('debug'):
+        if self.available_options.get('debug'):
             print('>> Reversion', page._rcinfo.get('user'), page.title())
         try:
             token = pywikibot.data.api.Request(site=self.site, parameters={
