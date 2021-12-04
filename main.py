@@ -106,7 +106,7 @@ class SeroBOT(Bot):
             talk = pywikibot.Page(self.site, title=usuario, ns=3)
             talk.text += u"\n{{sust:Aviso prueba2|" + pagina + "}} ~~~~"
             talk.save(
-                comment=u'Aviso de pruebas a usuario tras reversiones consecutivas')
+                summary=u'Aviso de pruebas a usuario tras reversiones consecutivas')
             with open(os.path.dirname(os.path.realpath(__file__)) + '/log/discusiones.log', 'a+') as archivo:
                 archivo.write('\t'.join(map(lambda x: str(x), [usuario, pagina, datetime.utcnow(
                 ).strftime('%Y%m%d%H%M%S'), int(datetime.utcnow().timestamp())])) + '\n')
@@ -129,7 +129,7 @@ class SeroBOT(Bot):
             tpl += u'}}'
             vec.text += "\n"+tpl
             try:
-                vec.save(comment=u'Reportando al usuario [[Special:Contributions/' +
+                vec.save(summary=u'Reportando al usuario [[Special:Contributions/' +
                          usuario+'|'+usuario+']] por posibles ediciones vándalicas')
             except:
                 pass
@@ -159,7 +159,7 @@ class SeroBOT(Bot):
         tabp.text += "\n"+tpl
         try:
             tabp.save(
-                comment=u'Solicitando protección de {0} por reversiones consecutivas'.format(pagina))
+                summary=u'Solicitando protección de {0} por reversiones consecutivas'.format(pagina))
         except:
             pass
         return
