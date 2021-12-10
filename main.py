@@ -3,16 +3,13 @@
 from __future__ import absolute_import, unicode_literals
 import pywikibot
 from pywikibot import pagegenerators, Bot
-import sys
 import os
 import requests
-import time
 from datetime import datetime
 import pandas as pd
 
 
 class SeroBOT(Bot):
-
     """BOT que revierte desde ORES"""
 
     def __init__(self, generator, site=None, **kwargs):
@@ -22,7 +19,7 @@ class SeroBOT(Bot):
             'wiki': 'eswiki',
             'debug': False
         })
-        """Constructor."""
+
         super(SeroBOT, self).__init__(**kwargs)
         self.generator = generator
         self.site = site
@@ -33,7 +30,7 @@ class SeroBOT(Bot):
         for page in filter(lambda x: self.valid(x), self.generator):
             try:
                 revision, buena_fe, danina, resultado = self.checkORES(page)
-            except Exception as e:
+            except Exception:
                 continue
             data = [revision, buena_fe, danina, resultado,
                     page._rcinfo.get('user'), page.title(), datetime.utcnow().strftime('%Y%m%d%H%M%S'), int(datetime.utcnow().timestamp())]
