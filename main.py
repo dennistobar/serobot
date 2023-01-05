@@ -25,12 +25,15 @@ class SeroBOT(Bot):
         self.site = site
         if self.site.logged_in() == False:
             self.site.login()
+        self.wiki = "{}{}".format(self.site.lang, str(
+            self.site.family).replace('pedia', ''))
 
     def run(self):
         for page in filter(lambda x: self.valid(x), self.generator):
             try:
                 revision, buena_fe, danina, resultado = self.checkORES(page)
-            except Exception:
+            except Exception as exp:
+                print(exp)
                 continue
             data = [revision, buena_fe, danina, resultado,
                     page._rcinfo.get('user'), page.title(), datetime.utcnow().strftime('%Y%m%d%H%M%S'), int(datetime.utcnow().timestamp())]
@@ -61,7 +64,7 @@ class SeroBOT(Bot):
         headers = {
             'User-Agent': 'SeroBOT - an ORES counter vandalism tool'
         }
-        wiki = self.available_options.get('wiki')
+        wiki = self.wiki
         revision = page._rcinfo.get('revision')
         ores = str(revision.get('new'))
         url = 'https://ores.wikimedia.org/v3/scores/{0}/{1}'.format(wiki, ores)
@@ -77,10 +80,11 @@ class SeroBOT(Bot):
             pywikibot.exception()
 
     def do_log(self, data):
+        wiki = self.wiki
         general = "{0}/log/{1}-general.log".format(os.path.dirname(
-            os.path.realpath(__file__)), self.available_options.get('wiki'))
+            os.path.realpath(__file__)), wiki)
         positivo = "{0}/log/{1}-positivo.log".format(os.path.dirname(
-            os.path.realpath(__file__)), self.available_options.get('wiki'))
+            os.path.realpath(__file__)), wiki)
         with open(general, encoding='utf-8', mode='a+') as archivo:
             archivo.write(u'\t'.join(map(lambda x: str(x), data)) + u'\n')
         if data[3] == True:
@@ -88,8 +92,9 @@ class SeroBOT(Bot):
                 archivo.write(u'\t'.join(map(lambda x: str(x), data)) + u'\n')
 
     def check_user(self, usuario, pagina):
+        wiki = self.wiki
         positivo = "{0}/log/{1}-positivo.log".format(os.path.dirname(
-            os.path.realpath(__file__)), self.available_options.get('wiki'))
+            os.path.realpath(__file__)), wiki)
         df_reversas = pd.read_csv(positivo, header=None, delimiter='\t')
         user = df_reversas[4] == usuario
         page = df_reversas[5] == pagina
@@ -133,8 +138,9 @@ class SeroBOT(Bot):
         return
 
     def check_pagina(self, pagina):
+        wiki = self.wiki
         positivo = "{0}/log/{1}-positivo.log".format(os.path.dirname(
-            os.path.realpath(__file__)), self.available_options.get('wiki'))
+            os.path.realpath(__file__)), wiki)
         df_reversas = pd.read_csv(positivo, header=None, delimiter='\t')
         page = df_reversas[5] == pagina
         past = (int(datetime.utcnow().timestamp()) -
@@ -156,7 +162,7 @@ class SeroBOT(Bot):
         tabp.text += "\n"+tpl
         try:
             tabp.save(
-                summary=u'Solicitando protección de {0} por reversiones consecutivas'.format(pagina))
+                summary=u'Solicitando protección de [[{0}]] por reversiones consecutivas'.format(pagina))
         except:
             pass
         return
