@@ -101,15 +101,6 @@ class SeroBOT(Bot):
             df.drop(columns=['isToDelete', 'time'], inplace=True)
             df.to_csv(positivo, index=False, sep='\t', header=False)
 
-        # remove old log
-        df = pd.read_csv(general, header=None, delimiter='\t')
-        df['time'] = pd.to_datetime(df[6], format='%Y%m%d%H%M%S', utc=True)
-        df['isToDelete'] = pd.to_datetime(
-            'now', utc=True) > df['time'] + pd.to_timedelta(6, unit='H')
-        df = df[df['isToDelete'] is False]
-        df.drop(columns=['isToDelete', 'time'], inplace=True)
-        df.to_csv(general, index=False, sep='\t', header=False)
-
     def check_user(self, usuario, pagina):
         wiki = self.wiki
         positivo = "{0}/log/{1}-positivo.log".format(os.path.dirname(
