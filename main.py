@@ -58,6 +58,9 @@ class SeroBOT(Bot):
         return page._rcinfo.get('type') == 'edit' and page._rcinfo.get('bot') is False and page._rcinfo.get('namespace') in [0, 104] and page._rcinfo.get('user') != self.site.username()
 
     def checkORES(self, page):
+        """
+        Chequea la página en ORES y determina si la probabilidad de reversa es verdadera o no
+        """
         headers = {
             'User-Agent': 'SeroBOT - an ORES counter vandalism tool'
         }
@@ -77,6 +80,9 @@ class SeroBOT(Bot):
             pywikibot.exception()
 
     def do_log(self, data):
+        """
+        Escribe y limpia el log, si el tiempo es superior a 6 horas
+        """
         wiki = self.wiki
         general = "{0}/log/{1}-general.log".format(os.path.dirname(
             os.path.realpath(__file__)), wiki)
@@ -91,7 +97,7 @@ class SeroBOT(Bot):
             df['time'] = pd.to_datetime(df[6], format='%Y%m%d%H%M%S', utc=True)
             df['isToDelete'] = pd.to_datetime(
                 'now', utc=True) > df['time'] + pd.to_timedelta(6, unit='H')
-            df = df[df['isToDelete'] == False]
+            df = df[df['isToDelete'] is False]
             df.drop(columns=['isToDelete', 'time'], inplace=True)
             df.to_csv(positivo, index=False, sep='\t', header=False)
 
@@ -100,7 +106,7 @@ class SeroBOT(Bot):
         df['time'] = pd.to_datetime(df[6], format='%Y%m%d%H%M%S', utc=True)
         df['isToDelete'] = pd.to_datetime(
             'now', utc=True) > df['time'] + pd.to_timedelta(6, unit='H')
-        df = df[df['isToDelete'] == False]
+        df = df[df['isToDelete'] is False]
         df.drop(columns=['isToDelete', 'time'], inplace=True)
         df.to_csv(general, index=False, sep='\t', header=False)
 
@@ -168,11 +174,11 @@ class SeroBOT(Bot):
         return
 
     def do_reverse(self, page):
-        try:
-            self.site.rollbackpage(page)
-            return
-        except Exception as e:
-            print(u'No puedo revertir la página ', e)
+        history = list(page.revisions(total=2))
+        if len(history) <= 1:
+            return False
+        print('reversa de ' + page.title())
+        self.site.rollbackpage(page)
 
 
 def main(*args):
