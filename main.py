@@ -93,13 +93,6 @@ class SeroBOT(Bot):
         if data[3] is True:
             with open(positivo, encoding='utf-8', mode='a+') as archivo:
                 archivo.write(u'\t'.join(map(lambda x: str(x), data)) + u'\n')
-            df = pd.read_csv(positivo, header=None, delimiter='\t')
-            df['time'] = pd.to_datetime(df[6], format='%Y%m%d%H%M%S', utc=True)
-            df['isToDelete'] = pd.to_datetime(
-                'now', utc=True) > df['time'] + pd.to_timedelta(6, unit='H')
-            df = df[df['isToDelete'] is False]
-            df.drop(columns=['isToDelete', 'time'], inplace=True)
-            df.to_csv(positivo, index=False, sep='\t', header=False)
 
     def check_user(self, usuario, pagina):
         wiki = self.wiki
