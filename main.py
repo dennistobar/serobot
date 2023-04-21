@@ -158,11 +158,14 @@ class SeroBOT(Bot):
         return
 
     def do_reverse(self, page):
-        history = list(page.revisions(total=2))
-        if len(history) <= 1:
-            return False
-        print('reversa de ' + page.title())
-        self.site.rollbackpage(page)
+        try:
+            history = list(page.revisions(total=2))
+            if len(history) <= 1:
+                return False
+            print('reversa de ' + page.title())
+            self.site.rollbackpage(page)
+        except:
+            pass
 
 
 def main(*args):
