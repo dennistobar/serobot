@@ -30,12 +30,19 @@ class SeroBOT(Bot):
     def run(self):
         for page in filter(lambda x: self.valid(x), self.generator):
             try:
-                revision, buena_fe, danina, resultado = self.checkORES(page)
+                revision, buena_fe, danina, resultado, algoritm = self.checkORES(
+                    page)
+                if resultado is False:
+                    revision, buena_fe, danina, resultado, algoritm = self.check_risk(
+                        page)
             except Exception as exp:
                 print(exp)
                 continue
+
             data = [revision, buena_fe, danina, resultado,
-                    page._rcinfo.get('user'), page.title(), datetime.utcnow().strftime('%Y%m%d%H%M%S'), int(datetime.utcnow().timestamp())]
+                    page._rcinfo.get('user'), page.title(),
+                    datetime.utcnow().strftime('%Y%m%d%H%M%S'),
+                    int(datetime.utcnow().timestamp()), algoritm]
             self.do_log(data)
             if resultado is True:
                 self.do_reverse(page)
@@ -57,6 +64,24 @@ class SeroBOT(Bot):
         """
         return page._rcinfo.get('type') == 'edit' and page._rcinfo.get('bot') is False and page._rcinfo.get('namespace') in [0, 104] and page._rcinfo.get('user') != self.site.username()
 
+    def check_risk(self, page):
+        """Chequea con el modelo revertrisk-multilingual al 0.949 de posibilidad"""
+        headers = {
+            'User-Agent': 'SeroBOT - an ORES/revertrisk-multilingual counter vandalism tool'
+        }
+        revision = page._rcinfo.get('revision')
+        ores = str(revision.get('new'))
+        url = 'https://api.wikimedia.org/service/lw/inference/v1/models/revertrisk-multilingual:predict'
+        r = requests.post(url=url, headers=headers, json={
+                          "rev_id": ores, "lang": self.site.lang})
+        data = r.json()
+
+        return [ores,
+                data.get('output').get('probabilities').get('false'),
+                data.get('output').get('probabilities').get('true'),
+                data.get('output').get('probabilities').get('true') > 0.955,
+                'revertrisk-multilingual']
+
     def checkORES(self, page):
         """
         Chequea la página en ORES y determina si la probabilidad de reversa es verdadera o no
@@ -75,7 +100,7 @@ class SeroBOT(Bot):
             damaging = data.get(wiki).get('scores').get(ores).get('damaging')
             buena_fe = goodfaith.get('score').get('probability').get('true')
             danina = damaging.get('score').get('probability').get('true')
-            return (ores, buena_fe, danina, True if buena_fe < self.available_options.get('gf') or danina > self.available_options.get('dm') else False)
+            return (ores, buena_fe, danina, True if buena_fe < self.available_options.get('gf') or danina > self.available_options.get('dm') else False, 'ORES')
         except:
             pywikibot.exception()
 
