@@ -40,12 +40,12 @@ class SeroBOT(Bot):
                     page._rcinfo.get('user'), page.title(),
                     datetime.utcnow().strftime('%Y%m%d%H%M%S'),
                     int(datetime.utcnow().timestamp()), algoritm]
+            self.do_log(data)
             if resultado is True:
-                self.do_reverse(page, page._rcinfo.get('user'))
+                self.do_reverse(page)
                 if (self.site.family.name == 'wikipedia' and self.site.lang == 'es'):
                     self.check_user(page._rcinfo.get('user'), page.title())
                     self.check_pagina(page.title())
-            self.do_log(data)
 
     def valid(self, page):
         """
@@ -179,14 +179,15 @@ class SeroBOT(Bot):
             pass
         return
 
-    def do_reverse(self, page, user):
+    def do_reverse(self, page):
         try:
             history = list(page.revisions(total=2))
             if len(history) <= 1:
                 return False
             print('reversa de ' + page.title())
-            self.site.rollbackpage(page, user)
-        except:
+            self.site.rollbackpage(page)
+        except Exception as exp:
+            print(exp)
             pass
 
 
