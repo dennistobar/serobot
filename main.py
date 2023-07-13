@@ -30,7 +30,7 @@ class SeroBOT(Bot):
     def run(self):
         for page in filter(lambda x: self.valid(x), self.generator):
             try:
-                revision, buena_fe, danina, resultado, algoritm = self.check_risk(
+                revision, buena_fe, danina, resultado, algoritm = self.checkORES(
                     page)
             except Exception as exp:
                 print(exp)
