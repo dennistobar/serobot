@@ -30,11 +30,8 @@ class SeroBOT(Bot):
     def run(self):
         for page in filter(lambda x: self.valid(x), self.generator):
             try:
-                revision, buena_fe, danina, resultado, algoritm = self.checkORES(
+                revision, buena_fe, danina, resultado, algoritm = self.check_risk(
                     page)
-                if resultado is False:
-                    revision, buena_fe, danina, resultado, algoritm = self.check_risk(
-                        page)
             except Exception as exp:
                 print(exp)
                 continue
@@ -43,12 +40,12 @@ class SeroBOT(Bot):
                     page._rcinfo.get('user'), page.title(),
                     datetime.utcnow().strftime('%Y%m%d%H%M%S'),
                     int(datetime.utcnow().timestamp()), algoritm]
-            self.do_log(data)
             if resultado is True:
-                self.do_reverse(page)
+                self.do_reverse(page, page._rcinfo.get('user'))
                 if (self.site.family.name == 'wikipedia' and self.site.lang == 'es'):
                     self.check_user(page._rcinfo.get('user'), page.title())
                     self.check_pagina(page.title())
+            self.do_log(data)
 
     def valid(self, page):
         """
@@ -79,7 +76,7 @@ class SeroBOT(Bot):
         return [ores,
                 data.get('output').get('probabilities').get('false'),
                 data.get('output').get('probabilities').get('true'),
-                data.get('output').get('probabilities').get('true') > 0.955,
+                data.get('output').get('probabilities').get('true') > 0.954,
                 'revertrisk-multilingual']
 
     def checkORES(self, page):
@@ -182,13 +179,13 @@ class SeroBOT(Bot):
             pass
         return
 
-    def do_reverse(self, page):
+    def do_reverse(self, page, user):
         try:
             history = list(page.revisions(total=2))
             if len(history) <= 1:
                 return False
             print('reversa de ' + page.title())
-            self.site.rollbackpage(page)
+            self.site.rollbackpage(page, user)
         except:
             pass
 
