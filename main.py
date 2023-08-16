@@ -30,7 +30,7 @@ class SeroBOT(Bot):
     def run(self):
         for page in filter(lambda x: self.valid(x), self.generator):
             try:
-                revision, buena_fe, danina, resultado, algoritm = self.checkORES(
+                revision, buena_fe, danina, resultado, algoritm = self.check_risk(
                     page)
             except Exception as exp:
                 print(exp)
@@ -62,13 +62,13 @@ class SeroBOT(Bot):
         return page._rcinfo.get('type') == 'edit' and page._rcinfo.get('bot') is False and page._rcinfo.get('namespace') in [0, 104] and page._rcinfo.get('user') != self.site.username()
 
     def check_risk(self, page):
-        """Chequea con el modelo revertrisk-multilingual al 0.949 de posibilidad"""
+        """Chequea con el modelo revertrisk-language-agnostic al 0.949 de posibilidad"""
         headers = {
-            'User-Agent': 'SeroBOT - an ORES/revertrisk-multilingual counter vandalism tool'
+            'User-Agent': 'SeroBOT - an ORES/revertrisk-language-agnostic counter vandalism tool'
         }
         revision = page._rcinfo.get('revision')
         ores = str(revision.get('new'))
-        url = 'https://api.wikimedia.org/service/lw/inference/v1/models/revertrisk-multilingual:predict'
+        url = 'https://api.wikimedia.org/service/lw/inference/v1/models/revertrisk-language-agnostic:predict'
         r = requests.post(url=url, headers=headers, json={
                           "rev_id": ores, "lang": self.site.lang})
         data = r.json()
@@ -77,7 +77,7 @@ class SeroBOT(Bot):
                 data.get('output').get('probabilities').get('false'),
                 data.get('output').get('probabilities').get('true'),
                 data.get('output').get('probabilities').get('true') > 0.954,
-                'revertrisk-multilingual']
+                'revertrisk-language-agnostic']
 
     def checkORES(self, page):
         """
