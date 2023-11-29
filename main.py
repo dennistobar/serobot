@@ -64,7 +64,7 @@ class SeroBOT(Bot):
             # que no sea yo mismo
             page._rcinfo.get('user') != self.site.username() and
             # que no sea una reversa (tag de reversa, los RV manual no los considera)
-            'mw-rollback' not in list(page.revisions(total=2))[0]['tags']
+            'mw-rollback' not in list(page.revisions(total=10))[0]['tags']
         )
 
     def check_risk(self, page):
