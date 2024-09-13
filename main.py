@@ -6,7 +6,8 @@ import os
 import requests
 import pandas as pd
 import pywikibot
-from pywikibot import pagegenerators, Bot
+from pywikibot import pagegenerators, Bot, User
+from functools import lru_cache
 
 
 class SeroBOT(Bot):
@@ -53,19 +54,29 @@ class SeroBOT(Bot):
         Check if we need to check the page from the LiveRCGenerator
 
         @param page: Page to check
+        @returns: bool
         """
+        username = page._rcinfo.get('user')
+
         return (
             # Solo lo que sea edicion
             page._rcinfo.get('type') == 'edit' and
             # que no sea bot
             not page._rcinfo.get('bot') and
-            # que este en el espacio principal o anexo
+            # que esté en el espacio principal o anexo
             page._rcinfo.get('namespace') in {0, 104} and
             # que no sea yo mismo
             page._rcinfo.get('user') != self.site.username() and
             # que no sea una reversa (tag de reversa, los RV manual no los considera)
-            'mw-rollback' not in list(page.revisions(total=10))[0]['tags']
+            'mw-rollback' not in list(page.revisions(total=10))[0]['tags'] and
+            # el usuario no es sysop (o bibliotecario en Wikipedia en español)
+            'sysop' not in self.retrieve_user(username).groups()
         )
+
+    @lru_cache(maxsize=500)
+    def retrieve_user(self, username):
+        """ Retrieve an user from the username. It uses this function to cache the results """
+        return User(self.site, username)
 
     def check_risk(self, page):
         """Send a request to Wikimedia API to check the revert-risk of the page"""
