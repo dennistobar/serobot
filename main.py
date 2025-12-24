@@ -1,38 +1,42 @@
 # -*- coding: utf-8 -*
 
 from __future__ import absolute_import, unicode_literals
-from datetime import datetime
+
 import os
-import requests
-import pandas as pd
-import pywikibot
-from pywikibot import pagegenerators, Bot, User
+from datetime import datetime
 from functools import lru_cache
+
+import pandas as pd
+import requests
+
+import pywikibot
+from pywikibot import Bot, User, pagegenerators
 
 
 class SeroBOT(Bot):
     """BOT que revierte desde ORES"""
 
-    def __init__(self, generator, site=None, **kwargs):
-        super(SeroBOT, self).__init__(**kwargs)
+    def __init__(self, generator, site, **kwargs):
         self.available_options.update({
             'gf': 0.085,
             'dm': 0.970,
-            'wiki': 'eswiki'
+            'wikifamily': 'eswiki'
         })
+        super(SeroBOT, self).__init__(**kwargs)
 
         self.generator = generator
         self.site = site
         if not self.site.logged_in():
             self.site.login()
-        self.wiki = "{}{}".format(self.site.lang, str(
-            self.site.family).replace('pedia', ''))
+        self.wiki = "{}{}".format(self.site.lang, str(self.site.family).replace('pedia', ''))
 
     def run(self):
         for page in filter(self.valid, self.generator):
             try:
-                revision, buena_fe, danina, resultado, algorithm = self.check_risk(
-                    page)
+                if self.site.family == 'wikibooks':
+                    revision, buena_fe, danina, resultado, algorithm = self.check_damaging(page)
+                else:
+                    revision, buena_fe, danina, resultado, algorithm = self.check_risk(page)
             except Exception as exp:
                 print(exp)
                 continue
@@ -102,12 +106,36 @@ class SeroBOT(Bot):
             # Handle the unexpected format or consider returning a default value
             return None, None, None, None, None
 
+    def check_damaging(self, page):
+        """Send a request to Wikimedia API to check the revert-risk of the page"""
+        headers = {
+            'User-Agent': 'SeroBOT - an ORES/revertrisk-language-agnostic counter vandalism tool'}
+        revision = page._rcinfo.get('revision')
+        revision_check = revision.get('new')
+        url = 'https://api.wikimedia.org/service/lw/inference/v1/models/{}{}-damaging:predict'.format(self.site.lang, self.site.family)
+
+        try:
+            data = requests.post(url=url, headers=headers, json={
+                                 "rev_id": revision_check, "lang": self.site.lang}).json()
+        except requests.RequestException as e:
+            print(f"Error in API request: {e}")
+            # Handle the error or consider returning a default value
+            return None, None, None, None, None
+
+        if self.wiki in data and 'scores' in data[self.wiki]:
+            scores = data[self.wiki]['scores'][revision_check]['damaging']['score']
+            return revision_check, scores['probability']['false'], scores['probability']['true'], \
+                scores['probability']['true'] > 0.954, 'revscoring damaging'
+        else:
+            print("Unexpected API response format")
+            # Handle the unexpected format or consider returning a default value
+            return None, None, None, None, None
+
     def do_log(self, data):
         wiki = self.wiki
-        general = os.path.join(os.path.dirname(os.path.realpath(
-            __file__)), "log", f"{wiki}-general.log")
-        positivo = os.path.join(os.path.dirname(os.path.realpath(
-            __file__)), "log", f"{wiki}-positivo.log")
+        print(wiki)
+        general = os.path.join(os.path.dirname(os.path.realpath(__file__)), "log", f"{wiki}-general.log")
+        positivo = os.path.join(os.path.dirname(os.path.realpath(__file__)), "log", f"{wiki}-positivo.log")
 
         with open(general, encoding="utf-8", mode="a+") as archivo:
             archivo.write("\t".join(map(str, data)) + "\n")
@@ -191,7 +219,7 @@ class SeroBOT(Bot):
         try:
             print('reversa de ' + page.title())
 
-            self.site.rollbackpage(page, user=user)
+            self.site.rollbackpage(page, user=user, markbot=False)
         except Exception as exp:
             print(exp)
             pass
@@ -205,13 +233,13 @@ def main(*args):
             opts['gf'] = float(arg[4:])
         elif arg.startswith('-dm:'):
             opts['dm'] = float(arg[4:])
-        elif arg.startswith('-wiki:'):
-            opts['wiki'] = arg[6:]
+        elif arg.startswith('-wikifamily:'):
+            opts['wikifamily'] = arg[12:]
 
     site = pywikibot.Site()
-    if 'wiki' in opts and opts['wiki'] != 'eswiki':
-        lang = opts['wiki'][0:2]
-        family = opts['wiki'][2:]
+    if 'wikifamily' in opts and opts['wikifamily'] != 'eswiki':
+        lang = opts['wikifamily'][0:2]
+        family = opts['wikifamily'][2:]
         site = pywikibot.Site(lang, family)
 
     bot = SeroBOT(pagegenerators.LiveRCPageGenerator(site), site=site, **opts)
