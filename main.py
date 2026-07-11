@@ -152,7 +152,7 @@ class SeroBOT(Bot):
 
     def do_log(self, data):
         wiki = self.wiki
-        pywikibot.info(f'Revisión de {data[5]}')
+        pywikibot.debug(f'Revisión de {data[5]}')
         general = self._log_path('general')
         positivo = self._log_path('positivo')
 
@@ -231,6 +231,12 @@ class SeroBOT(Bot):
         except pywikibot.Error as e:
             pywikibot.error(f'Error saving tablon: {e}')
         return
+
+    def exit(self):
+        gen = self.generator
+        if hasattr(gen, 'source') and gen.source:
+            gen.source.close()
+        super().exit()
 
     def do_reverse(self, page, user):
         try:
