@@ -9,7 +9,7 @@ Este bot está disponible bajo licencia MIT
 Este script requiere de [pywikibot](https://mediawiki.org/wiki/pywikibot) para funcionar, por lo cual se deben seguir los pasos de instalación de pywikibot. Además requiere [pandas](https://pandas.pydata.org/) para hacer el filtrado del log más eficiente y fácil de entender.
 
 Para las dependencias, se deben instalar lo siguiente:
-`pip3 install sseclient requests pandas`
+`pip3 install sseclient requests pandas requests-sse`
 
 Una vez hecho, se debe clonar el repositorio y ejecutar el script `python pwb.py <carpeta>/main` para comenzar la ejecución del bot.
 
