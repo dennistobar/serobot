@@ -173,9 +173,9 @@ class SeroBOT(Bot):
 
         # Handle two consecutive reversions by a registered user
         if len(user_reversions) == 2:
-            if not pywikibot.User(self.site, user).isAnonymous():
+            if not self.retrieve_user(user).isAnonymous():
                 talk_page = pywikibot.Page(self.site, title=user, ns=3)
-                talk_page.text += "\n{{subst:Aviso prueba2|" + page + "}} ~~~~"
+                talk_page.text += f'\n{{{{subst:Aviso prueba2|{page}}}}} ~~~~'
                 summary = 'Aviso de pruebas a usuario tras reversiones consecutivas'
                 try:
                     talk_page.save(summary=summary)
@@ -187,16 +187,13 @@ class SeroBOT(Bot):
         if len(user_reversions) == 4:
             vandalism_page = pywikibot.Page(
                 self.site, title='Vandalismo en curso', ns=4)
-            template = "\n" + '{{subst:'
-            template += 'ReportevandalismoIP' if pywikibot.User(
-                self.site, user).isAnonymous() else 'Reportevandalismo'
-            template += '|1=' + user
-            template += '|2=Reversiones: ' + (', '.join(
-                map(lambda x: '[[Special:Diff/' + str(x) + '|diff: ' + str(x) + ']]', user_reversions[0])))
-            template += '}}'
-            vandalism_page.text += "\n" + template
-            summary = 'Reportando al usuario [[Special:Contributions/' + \
-                user + '|' + user + ']] por posibles ediciones vándalicas'
+            rev_links = ', '.join(
+                f'[[Special:Diff/{x}|diff: {x}]]' for x in user_reversions[0])
+            template_name = 'ReportevandalismoIP' if self.retrieve_user(
+                user).isAnonymous() else 'Reportevandalismo'
+            template = f'\n{{{{subst:{template_name}|1={user}|2=Reversiones: {rev_links}}}}}'
+            vandalism_page.text += template
+            summary = f'Reportando al usuario [[Special:Contributions/{user}|{user}]] por posibles ediciones vándalicas'
             try:
                 vandalism_page.save(summary=summary)
             except pywikibot.Error as e:
