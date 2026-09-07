@@ -78,6 +78,7 @@ class SeroBOT(Bot):
         except pywikibot.exceptions.NoPageError:
             return False
         not_a_rollback = not revs or 'mw-rollback' not in revs[0]['tags']
+        user_groups = self.retrieve_user(username).groups()
 
         return (
             # Solo lo que sea edicion
@@ -91,7 +92,9 @@ class SeroBOT(Bot):
             # que no sea una reversa (tag de reversa, los RV manual no los considera)
             not_a_rollback and
             # el usuario no es sysop (o bibliotecario en Wikipedia en español)
-            'sysop' not in self.retrieve_user(username).groups()
+            'sysop' not in user_groups and
+            # el usuario no es autconfirmado
+            'autopatrolled' not in user_groups
         )
 
     @lru_cache(maxsize=500)
